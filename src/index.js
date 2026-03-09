@@ -1,7 +1,14 @@
 import express from 'express';
+import http from 'http';
+import {matchRouter} from '../src/route';
+
+const PORT = Number(process.env.PORT || 8000);
+const HOST = process.env.HOST || '0.0.0.0';
 
 const app = express();
-const PORT = 8000;
+
+const server = http.createServer(app)
+
 
 // Use JSON middleware
 app.use(express.json());
