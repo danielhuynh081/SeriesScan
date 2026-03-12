@@ -11,6 +11,7 @@ function broadcast(wss, payload){
         if(client.readyState !== WebSocket.OPEN) continue;
 
         client.send(JSON.stringify(payload));
+        //
     }
 }
 
