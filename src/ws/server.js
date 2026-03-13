@@ -25,6 +25,7 @@ export function attachWebSocketServer(server){
                 const decision = await wsArcjet.protect(req);
 
                 if(decision.isDenied()){
+                    //
                     if(decision.reason.isRateLimit())
                     {
                         socket.write('HTTP/1.1 429 Too many requests\r\n\r\n');
