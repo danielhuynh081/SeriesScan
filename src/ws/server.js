@@ -1,4 +1,5 @@
 import WebSocket,  {WebSocketServer} from 'ws';
+import {wsArcjet} from "../arcjet.js";
 
 function sendJson(socket, payload){
     if(socket.readyState !== WebSocket.OPEN) return;
@@ -18,7 +19,28 @@ function broadcast(wss, payload){
 export function attachWebSocketServer(server){
     const wss = new WebSocketServer({server, path: '/ws', maxPayload: 1024 * 1024});
 
-    wss.on('connection', (socket) => {
+    wss.on('upgrade', async (socket, req, head) => {
+        if(wsArcjet){
+            try{
+                const decision = await wsArcjet.protect(req);
+
+                if(decision.isDenied()){
+                    if(decision.reason.isRateLimit())
+                    {
+                        socket.write('HTTP/1.1 429 Too many requests\r\n\r\n');
+                    }else{
+                        socket.write('HTTP/1.1 403 forbidden\r\n\r\n')
+                    }
+                    socket.destroy()
+                    return;
+                }
+            }catch(e){
+                console.error('ws connection error', e);
+                socket.close(1011, 'Server security error');
+                return;
+
+            }
+        }
         //ping pong test
         socket.isAlive = true;
         socket.on('pong', () => {socket.isAlive = true;});
